@@ -7,6 +7,7 @@ const CalendarScreen = () => {
     const [isModalVisible, setModalVisible] = useState(false);
 
     const toggleModal = () => {
+        console.log('test')
         setModalVisible(!isModalVisible);
     };
 
@@ -25,14 +26,14 @@ const CalendarScreen = () => {
                     toggleModal();
                 }}
             />
-            {/* <Modal isVisible={isModalVisible}>
+            <Modal visible={isModalVisible}>
                 <View>
                     <Text>This is your modal content</Text>
                     <TouchableOpacity onPress={toggleModal}>
                         <Text>Close</Text>
                     </TouchableOpacity>
                 </View>
-            </Modal> */}
+            </Modal>
         </View>
     )
 }
