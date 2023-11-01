@@ -32,7 +32,7 @@ const HomeScreen = () => {
 
   const updateItem = async () => {
     try {
-      const docRef = doc(FIREBASE_DB, "users", "VWYe3MDNbke80wKgWPVe"); // Replace the collection name and document ID with your own
+      const docRef = doc(FIREBASE_DB, "users", "DpPET4dX0Nvf6z8xGvCm"); // Replace the collection name and document ID with your own
       await updateDoc(docRef, {
         first: "Updated",
         last: "Updated",
@@ -47,7 +47,7 @@ const HomeScreen = () => {
 
   const deleteItem = async () => {
     try {
-      const docRef = doc(FIREBASE_DB, "users", "VWYe3MDNbke80wKgWPVe"); // Replace the collection name and document ID with your own
+      const docRef = doc(FIREBASE_DB, "users", "qIElaInShRDFAbyBru7a"); // Replace the collection name and document ID with your own
       await deleteDoc(docRef);
       console.log("Document Deleted successfully");
     } catch (e) {
