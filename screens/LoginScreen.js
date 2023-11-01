@@ -20,17 +20,6 @@ const LoginScreen = () => {
     //     return unsubscribe
     // }, [])
 
-    const handleSignUp = () => {
-        createUserWithEmailAndPassword(FIREBASE_AUTH, email, password)
-            .then((userCredential) => {
-                const user = userCredential.user;
-            })
-            .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-            });
-    }
-
     const handleLogin = () => {
         signInWithEmailAndPassword(FIREBASE_AUTH, email, password)
             .then((userCredential) => {
@@ -74,10 +63,11 @@ const LoginScreen = () => {
                     <Text style={styles.buttonText}>Login</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    onPress={handleSignUp} // Call handleSignUp function when the Register button is pressed
-                    style={[styles.button, styles.buttonOutline]}
+                    onPress={()=>{
+                      navigation.navigate('Register');
+                    }}
                 >
-                    <Text style={styles.buttonOutlineText}>Register</Text>
+                    <Text style={styles.buttonOutlineText}>Go to Register</Text>
                 </TouchableOpacity>
             </View>
         </KeyboardAvoidingView>
@@ -126,6 +116,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     buttonOutlineText: {
+        marginTop: 50,
         color: '#0782F9',
         fontWeight: '700',
         fontSize: 16,

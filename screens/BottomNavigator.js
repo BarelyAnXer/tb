@@ -45,11 +45,11 @@ const BottomTabNavigator = () => (
       }}
     />
     <Tab.Screen
-      name="Profile"
-      component={ProfileScreen}
+      name="Calendar"
+      component={AlarmScreen}
       options={{
         tabBarIcon: ({ color, size }) => (
-          <Ionicons name="person" color={color} size={size} />
+          <Ionicons name="calendar" color={color} size={size} />
         ),
       }}
     />
@@ -62,15 +62,16 @@ const BottomTabNavigator = () => (
         ),
       }}
     />
-    <Tab.Screen
-      name="Alarm"
-      component={AlarmScreen}
+     <Tab.Screen
+      name="Profile"
+      component={ProfileScreen}
       options={{
         tabBarIcon: ({ color, size }) => (
-          <Ionicons name="alarm" color={color} size={size} />
+          <Ionicons name="person" color={color} size={size} />
         ),
       }}
     />
+   
     <Tab.Screen
       name="List"
       component={ListScreen}
