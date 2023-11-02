@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react'
 import { useNavigation } from '@react-navigation/core'
 import * as ImagePicker from 'expo-image-picker';
 import { FIREBASE_DB, FIREBASE_APP, FIREBASE_STORAGE } from '../firebase';
-import { getStorage, ref, uploadBytes, uploadString } from "firebase/storage";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
 
 
 const ProfileScreen = () => {
@@ -39,22 +40,21 @@ const ProfileScreen = () => {
 
       await uploadBytes(storageRef, blob);
       console.log('Image uploaded successfully.');
+      fetchImageUrl();
     } catch (error) {
       console.error('Error uploading image: ', error);
     }
 
   };
 
+  const fetchImageUrl = async () => {
+    const storageRef = ref(FIREBASE_STORAGE, "image.png");
+    const downloadURL = await getDownloadURL(storageRef);
+    setImage(downloadURL);
+  };
 
   useEffect(() => {
-    // const fetchImageUrl = async () => {
-    //   const doc = await FIREBASE_DB.collection('collectionName').doc('docId').get();
-    //   if (doc.exists) {
-    //     setImageUrl(doc.data().imageUrl);
-    //   }
-    // };
-
-    // fetchImageUrl();
+    fetchImageUrl();
   }, []);
 
   return (
