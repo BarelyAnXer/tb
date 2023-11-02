@@ -36,7 +36,7 @@ const BottomTabNavigator = () => (
   }}
 >
     <Tab.Screen
-      name="Home"
+      name="Dashboard"
       component={HomeScreen}
       options={{
         tabBarIcon: ({ color, size }) => (

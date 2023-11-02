@@ -1,24 +1,13 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
+import { Video } from 'expo-av';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../firebase';
-import { useNavigation } from '@react-navigation/core'
+
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 
 const HomeScreen = () => {
   const [users, setUsers] = useState([]);
-  const navigation = useNavigation();
-
-  const handleLogout = () => {
-
-    // signOut(FIREBASE_AUTH)
-    // .then(() => {
-    navigation.navigate('Login');
-    // })
-    // .catch((error) => {
-    //   console.error('Error signing out:', error);
-    // });
-  }
-
+  
   useEffect(() => {
     const readData = async () => {
       const querySnapshot = await getDocs(collection(FIREBASE_DB, "users"));
@@ -74,12 +63,7 @@ const HomeScreen = () => {
     <View style={styles.container}>
       <Text>Email: {FIREBASE_AUTH.currentUser?.email}</Text>
       <Text>UID: {FIREBASE_AUTH.currentUser?.uid}</Text>
-      <TouchableOpacity
-        onPress={handleLogout}
-        style={styles.button}
-      >
-        <Text style={styles.buttonText}>Sign out</Text>
-      </TouchableOpacity>
+     
 
       <TouchableOpacity
         onPress={addItem}
@@ -103,6 +87,12 @@ const HomeScreen = () => {
       </TouchableOpacity>
 
 
+      <Video
+        source={{ uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' }}
+        style={styles.video}
+        useNativeControls
+        resizeMode="contain"
+      />
 
     </View>
   )
@@ -111,6 +101,10 @@ const HomeScreen = () => {
 export default HomeScreen
 
 const styles = StyleSheet.create({
+  video: {
+    width: 300,
+    height: 200,
+  },
   container: {
     flex: 1,
     justifyContent: 'center',

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, TextInput, View, KeyboardAvoidingView, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect } from 'react'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FIREBASE_AUTH } from '../firebase';
 import { useNavigation } from '@react-navigation/core'
 
@@ -24,7 +24,7 @@ const LoginScreen = () => {
         signInWithEmailAndPassword(FIREBASE_AUTH, email, password)
             .then((userCredential) => {
                 const user = userCredential.user;
-                console.log(user)
+                // maybe put this to async storage
                 navigation.navigate('Home');
             })
             .catch((error) => {

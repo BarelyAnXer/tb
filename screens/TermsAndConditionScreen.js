@@ -20,11 +20,7 @@ const TermsAndConditionsScreen = ({ navigation }) => {
   };
 
   const handleDisagree = () => {
-    // Disagree action: Go back or reset the navigation stack
-    BackHandler.exitApp(); // Go back to the previous screen
-
-    // If you want to reset the navigation stack to prevent the user from going forward, you can use the following method:
-    // navigation.reset({ index: 0, routes: [{ name: 'TermsAndConditions' }] });
+    BackHandler.exitApp(); 
   };
 
   return (
@@ -33,7 +29,6 @@ const TermsAndConditionsScreen = ({ navigation }) => {
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla convallis libero in metus
         consequat, sed facilisis est varius. Vestibulum feugiat enim id tellus tempor, vitae
         consectetur metus tincidunt.
-        {/* Your terms and conditions text here */}
       </Text>
       <View style={styles.buttonContainer}>
         <Button title="Agree" onPress={handleAccept} />

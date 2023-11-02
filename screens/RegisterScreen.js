@@ -1,19 +1,39 @@
 import { StyleSheet, Text, TextInput, View, KeyboardAvoidingView, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect } from 'react'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { FIREBASE_AUTH } from '../firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { FIREBASE_AUTH, FIREBASE_DB } from '../firebase';
 import { useNavigation } from '@react-navigation/core'
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 
 const RegisterScreen = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [firstName, setFirstName] = useState('')
+    const [lastName, setLastName] = useState('')
 
     const navigation = useNavigation()
 
     const handleSignUp = () => {
         createUserWithEmailAndPassword(FIREBASE_AUTH, email, password)
-            .then((userCredential) => {
+            .then(async (userCredential) => {
                 const user = userCredential.user;
+                console.log("here1")
+                // Update user profile with first and last name
+                // await user.updateProfile({
+                //     displayName: `${firstName} ${lastName}`
+                // });
+                console.log("here2")
+                // Store additional user data in Firebase Firestore
+                try {
+                    const docRef = await addDoc(collection(FIREBASE_DB, "users"), {
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                    });
+                    console.log("Document written with ID: ", docRef.id);
+                } catch (e) {
+                    console.error("Error adding document: ", e);
+                }
             })
             .catch((error) => {
                 const errorCode = error.code;
@@ -26,6 +46,20 @@ const RegisterScreen = () => {
             style={styles.container}
             behavior="padding">
             <View style={styles.inputContainer}>
+
+                <TextInput
+                    placeholder="First name"
+                    value={firstName}
+                    onChangeText={text => setFirstName(text)}
+                    style={styles.input}
+                />
+
+                <TextInput
+                    placeholder="Last name"
+                    value={lastName}
+                    onChangeText={text => setLastName(text)}
+                    style={styles.input}
+                />
                 <TextInput
                     placeholder="Email"
                     value={email}
@@ -47,11 +81,11 @@ const RegisterScreen = () => {
                     onPress={handleSignUp} // Call handleSignUp function when the Register button is pressed
                     style={[styles.button, styles.buttonOutline]}
                 >
-                     <Text style={styles.buttonText}>Register</Text>
+                    <Text style={styles.buttonText}>Register</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    onPress={()=>{
-                      navigation.navigate('Login');
+                    onPress={() => {
+                        navigation.navigate('Login');
                     }}
                 >
                     <Text style={styles.buttonOutlineText}>Go to Login</Text>
@@ -98,12 +132,12 @@ const styles = StyleSheet.create({
         borderWidth: 2,
     },
     buttonText: {
-        color: 'white',
+        color: '#0782F9',
         fontWeight: '700',
         fontSize: 16,
     },
     buttonOutlineText: {
-      marginTop: 50,
+        marginTop: 50,
         color: '#0782F9',
         fontWeight: '700',
         fontSize: 16,
