@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../firebase';
 import { useNavigation } from '@react-navigation/core'
-import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc } from "firebase/firestore";
 
 const RegisterScreen = () => {
     const [email, setEmail] = useState('')
@@ -17,20 +17,13 @@ const RegisterScreen = () => {
         createUserWithEmailAndPassword(FIREBASE_AUTH, email, password)
             .then(async (userCredential) => {
                 const user = userCredential.user;
-                console.log("here1")
-                // Update user profile with first and last name
-                // await user.updateProfile({
-                //     displayName: `${firstName} ${lastName}`
-                // });
-                console.log("here2")
-                // Store additional user data in Firebase Firestore
                 try {
-                    const docRef = await addDoc(collection(FIREBASE_DB, "users"), {
+                    await setDoc(doc(FIREBASE_DB, "users", user.uid), {
                         firstName: firstName,
                         lastName: lastName,
                         email: email,
                     });
-                    console.log("Document written with ID: ", docRef.id);
+                    console.log("Document written with ID: ", user.uid);
                 } catch (e) {
                     console.error("Error adding document: ", e);
                 }
@@ -40,6 +33,7 @@ const RegisterScreen = () => {
                 const errorMessage = error.message;
             });
     }
+
 
     return (
         <KeyboardAvoidingView

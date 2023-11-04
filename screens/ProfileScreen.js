@@ -9,7 +9,6 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const ProfileScreen = () => {
   const [image, setImage] = useState(null);
-  const [imageUrl, setImageUrl] = useState(null);
 
   const handleLogout = () => {
     // signOut(FIREBASE_AUTH)

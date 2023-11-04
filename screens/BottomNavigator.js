@@ -6,8 +6,8 @@ import { TransitionPresets } from '@react-navigation/stack';
 import HomeScreen from './HomeScreen';
 import ProfileScreen from './ProfileScreen';
 import SettingsScreen from './SettingsScreen';
-import AlarmScreen from './AlarmScreen';
 import ListScreen from './ListScreen';
+import CalendarScreen from './CalendarScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -46,7 +46,7 @@ const BottomTabNavigator = () => (
     />
     <Tab.Screen
       name="Calendar"
-      component={AlarmScreen}
+      component={CalendarScreen}
       options={{
         tabBarIcon: ({ color, size }) => (
           <Ionicons name="calendar" color={color} size={size} />
