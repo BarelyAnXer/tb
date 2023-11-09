@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import TermsAndConditionsScreen from './screens/TermsAndConditionScreen';
 import LoginScreen from './screens/LoginScreen';
 import BottomTabNavigator from './screens/BottomNavigator';

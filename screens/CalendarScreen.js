@@ -5,19 +5,24 @@ import { FIREBASE_DB, FIREBASE_AUTH, FIREBASE_STORAGE } from '../firebase';
 import { collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { onAuthStateChanged } from 'firebase/auth';
 import * as ImagePicker from 'expo-image-picker';
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 
 const CalendarScreen = () => {
+    const [userID, setUserID] = useState('')
+    const [userLoaded, setUserLoaded] = useState(false);
     const [isModalVisible, setModalVisible] = useState(false);
+
     const [medicine, setMedicine] = useState('');
     const [time, setTime] = useState('');
+    const [pickedImage, setPickedImage] = useState(null);
+
     const [clickedDate, setClickedDate] = useState('');
+
     const [medicinesList, setMedicinesList] = useState([]);
-    const [userID, setUserID] = useState('')
     const [imageUrls, setImageUrls] = useState({});
 
-    const [userLoaded, setUserLoaded] = useState(false);
+
 
     useEffect(() => {
         const getCurrentUserID = () => {
@@ -36,6 +41,13 @@ const CalendarScreen = () => {
     }, []);
 
     useEffect(() => {
+        // Fetch data only if the user ID is loaded and not empty
+        if (userLoaded && userID !== '') {
+            fetchMedicines();
+        }
+    }, [userLoaded, userID]);
+
+    useEffect(() => {
         const fetchImageUrls = async () => {
             const urls = {};
             for (const med of medicinesList) {
@@ -48,12 +60,7 @@ const CalendarScreen = () => {
         fetchImageUrls();
     }, [medicinesList]);
 
-    useEffect(() => {
-        // Fetch data only if the user ID is loaded and not empty
-        if (userLoaded && userID !== '') {
-            fetchMedicines();
-        }
-    }, [userLoaded, userID]);
+
 
     const fetchMedicines = async () => {
         const userMedsCollection = collection(FIREBASE_DB, `users/${userID}/medicines`);
@@ -67,6 +74,7 @@ const CalendarScreen = () => {
     };
 
     const toggleModal = () => {
+        console.log(imageUrls, "WAKWKAWWK")
         setModalVisible(!isModalVisible);
     };
 
@@ -85,21 +93,50 @@ const CalendarScreen = () => {
             console.error('Error adding medicine data: ', e);
         }
 
+
+        // saving image
+        try {
+            const storageRef = ref(FIREBASE_STORAGE, `${medicine}-${clickedDate}-${time}-${userID}`);
+
+            const response = await fetch(pickedImage.uri);
+            const blob = await response.blob();
+            console.log(pickedImage, "RESULT")
+            console.log(response, "RESPONSE")
+
+            await uploadBytes(storageRef, blob);
+            console.log('Image uploaded successfully.');
+        } catch (error) {
+            console.error('Error uploading image: ', error);
+        }
+
+        setMedicine("");
+        setTime("");
+        setPickedImage(null);
         toggleModal();
         fetchMedicines();
     };
 
-    const deleteMedicine = async (id) => {
+    const deleteMedicine = async (med) => {
         try {
-            const docRef = doc(FIREBASE_DB, `users/${userID}/medicines`, id)
+            const docRef = doc(FIREBASE_DB, `users/${userID}/medicines`, med.id);
             await deleteDoc(docRef);
-            console.log('Medicine deleted with ID: ', id);
+            console.log('Medicine deleted with ID: ', med.id);
+
+            // Delete the image from Firebase Storage
+            const desertRef = ref(FIREBASE_STORAGE, med.imgURL);
+            deleteObject(desertRef).then(() => {
+                console.log("image delete successfuly")
+            }).catch((error) => {
+                console.log(`Uh-oh, an error occurred! ${error}`)
+            });
+
         } catch (e) {
-            console.error('Error deleting medicine: ', e);
+            console.error('Error deleting medicine or image: ', e);
         }
 
         fetchMedicines(); // Refresh the medicine list after deleting a medicine
     };
+
 
     const customMarkedDates = {
         '2023-11-20': { selected: true, selectedColor: 'blue', marked: true },
@@ -111,24 +148,10 @@ const CalendarScreen = () => {
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             quality: 1,
         });
-
-        try {
-            const storageRef = ref(FIREBASE_STORAGE, `${medicine}-${clickedDate}-${time}-${userID}`);
-
-            const response = await fetch(result.uri);
-            const blob = await response.blob();
-            console.log(result, "RESULT")
-            console.log(response, "RESPONSE")
-
-            await uploadBytes(storageRef, blob);
-            console.log('Image uploaded successfully.');
-        } catch (error) {
-            console.error('Error uploading image: ', error);
-        }
+        setPickedImage(result);
     };
 
     const fetchImageUrl = async (imgURL) => {
-        console.log("WAKWAWKAWKAWK")
         try {
             const storageRef = ref(FIREBASE_STORAGE, imgURL);
             const url = await getDownloadURL(storageRef);
@@ -179,28 +202,41 @@ const CalendarScreen = () => {
                         <TouchableOpacity style={styles.uploadButton} onPress={handleChooseImage}>
                             <Text style={styles.buttonText}>Upload Image</Text>
                         </TouchableOpacity>
+
+                        <Button title="Debug" onPress={() => {
+                            console.log(medicinesList)
+                        }} />
+
+                        {/* turn this into page if ever na ano masyado maliit */}
+                        <View>
+                            {medicinesList.map((med, index) => {
+                                if (med.date === clickedDate) {
+                                    return <View key={med.id} style={styles.medicineItem}>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            {/* Display the medicine image */}
+                                            <Image
+                                                source={{ uri: imageUrls[med.id] }}
+                                                style={{ width: 50, height: 50, marginRight: 10 }}
+                                            />
+                                            <Text>{med.medicine} - {med.time}</Text>
+                                        </View>
+                                        <TouchableOpacity onPress={() => deleteMedicine(med)}>
+                                            <Text style={styles.deleteButton}>Delete</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                }
+                            })}
+                        </View>
                     </View>
                 </View>
             </Modal>
 
-            {/* Display Medicines */}
             <View>
-                {medicinesList.map((med, index) => (
-                    <View key={med.id} style={styles.medicineItem}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            {/* Display the medicine image */}
-                            <Image
-                                source={{ uri: imageUrls[med.id] }}
-                                style={{ width: 50, height: 50, marginRight: 10 }}
-                            />
-                            <Text>{med.medicine} - {med.time}</Text>
-                        </View>
-                        <TouchableOpacity onPress={() => deleteMedicine(med.id)}>
-                            <Text style={styles.deleteButton}>Delete</Text>
-                        </TouchableOpacity>
-                    </View>
-                ))}
+
+                <Text>Display Events here</Text>
+
             </View>
+
         </View>
     );
 };
