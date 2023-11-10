@@ -23,6 +23,21 @@ const RegisterScreen = () => {
                         lastName: lastName,
                         email: email,
                     });
+
+                    const userSymptomCollection = collection(FIREBASE_DB, `users/${user.uid}/symptoms`);
+                    const symptoms = ["Body Aches", "Bruising or Yellow Skin", "Cold Sweat", "Diarrhea", "Dizziness",
+                        "Fever", "Headache", "Insomnia", "Itchy Skin", "Loss of Appetite", "Nausea", "Restlessness", "Skin Rashes",
+                        "Upset Stomach", "Vertigo", "Vomiting"];
+
+                    symptoms.forEach(async (symptom) => {
+                        await addDoc(userSymptomCollection, {
+                            symptom: symptom,
+                            isChecked: false
+                        });
+                    });
+
+
+
                     console.log("Document written with ID: ", user.uid);
                 } catch (e) {
                     console.error("Error adding document: ", e);

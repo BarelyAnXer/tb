@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Modal, TextInput, Button, Image } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { FIREBASE_DB, FIREBASE_AUTH, FIREBASE_STORAGE } from '../firebase';
-import { collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from 'firebase/auth';
 import * as ImagePicker from 'expo-image-picker';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
@@ -94,24 +94,10 @@ const CalendarScreen = () => {
         }
 
 
-        // saving image
-        try {
-            const storageRef = ref(FIREBASE_STORAGE, `${medicine}-${clickedDate}-${time}-${userID}`);
 
-            const response = await fetch(pickedImage.uri);
-            const blob = await response.blob();
-            console.log(pickedImage, "RESULT")
-            console.log(response, "RESPONSE")
-
-            await uploadBytes(storageRef, blob);
-            console.log('Image uploaded successfully.');
-        } catch (error) {
-            console.error('Error uploading image: ', error);
-        }
 
         setMedicine("");
         setTime("");
-        setPickedImage(null);
         toggleModal();
         fetchMedicines();
     };
@@ -143,13 +129,40 @@ const CalendarScreen = () => {
         '2023-11-24': { customStyles: { backgroundColor: 'red' } },
     };
 
-    const handleChooseImage = async () => {
+    const handleChooseImage = async (medicineId) => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             quality: 1,
         });
-        setPickedImage(result);
+
+        try {
+            const storageRef = ref(
+                FIREBASE_STORAGE,
+                `${medicineId}-${clickedDate}-${time}-${userID}`
+            );
+
+            const response = await fetch(result.uri);
+            const blob = await response.blob();
+
+            // Upload image to storage
+            await uploadBytes(storageRef, blob);
+            console.log('Image uploaded successfully.');
+
+            // Get the download URL of the uploaded image
+            const downloadURL = await getDownloadURL(storageRef);
+
+            const docRef = doc(FIREBASE_DB, `users/${userID}/medicines`, medicineId); // Replace with your collection and document ID
+            await updateDoc(docRef, {
+                imgURL: `${medicineId}-${clickedDate}-${time}-${userID}`,
+            });
+
+            console.log('Document updated with image URL');
+        } catch (error) {
+            console.error('Error updating document with image URL: ', error);
+        }
+        fetchMedicines();
     };
+
 
     const fetchImageUrl = async (imgURL) => {
         try {
@@ -177,6 +190,12 @@ const CalendarScreen = () => {
             <Modal visible={isModalVisible} transparent animationType="fade">
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
+
+                        <TouchableOpacity onPress={toggleModal}>
+                            <Text style={styles.exit}>Close</Text>
+                        </TouchableOpacity>
+
+
                         <Text>Medicine:</Text>
                         <TextInput
                             style={styles.input}
@@ -195,13 +214,7 @@ const CalendarScreen = () => {
 
                         <Button title="Save" onPress={saveDataToFirebase} />
 
-                        <TouchableOpacity onPress={toggleModal}>
-                            <Text style={styles.exit}>Close</Text>
-                        </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.uploadButton} onPress={handleChooseImage}>
-                            <Text style={styles.buttonText}>Upload Image</Text>
-                        </TouchableOpacity>
 
                         <Button title="Debug" onPress={() => {
                             console.log(medicinesList)
@@ -211,19 +224,27 @@ const CalendarScreen = () => {
                         <View>
                             {medicinesList.map((med, index) => {
                                 if (med.date === clickedDate) {
-                                    return <View key={med.id} style={styles.medicineItem}>
-                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                            {/* Display the medicine image */}
-                                            <Image
-                                                source={{ uri: imageUrls[med.id] }}
-                                                style={{ width: 50, height: 50, marginRight: 10 }}
-                                            />
-                                            <Text>{med.medicine} - {med.time}</Text>
+                                    return (
+                                        <View key={med.id} style={styles.medicineItem}>
+                                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                                {/* Display the medicine image */}
+                                                <Image
+                                                    source={{ uri: imageUrls[med.id] }}
+                                                    style={{ width: 50, height: 50, marginRight: 10 }}
+                                                />
+                                                <Text>{med.medicine} - {med.time}</Text>
+                                            </View>
+                                            <TouchableOpacity onPress={() => deleteMedicine(med)}>
+                                                <Text style={styles.deleteButton}>Delete</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity
+                                                style={styles.uploadButton}
+                                                onPress={() => handleChooseImage(med.id)} // Pass the medicine id
+                                            >
+                                                <Text style={styles.buttonText}>Upload Image</Text>
+                                            </TouchableOpacity>
                                         </View>
-                                        <TouchableOpacity onPress={() => deleteMedicine(med)}>
-                                            <Text style={styles.deleteButton}>Delete</Text>
-                                        </TouchableOpacity>
-                                    </View>
+                                    );
                                 }
                             })}
                         </View>
