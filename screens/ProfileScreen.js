@@ -7,19 +7,8 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
   const [image, setImage] = useState(null);
-
-  const handleLogout = () => {
-    // signOut(FIREBASE_AUTH)
-    // .then(() => {
-    navigation.navigate('Login');
-    // })
-    // .catch((error) => {
-    //   console.error('Error signing out:', error);
-    // });
-  };
-
 
   const handleChooseImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -66,10 +55,10 @@ const ProfileScreen = () => {
         <Text style={styles.buttonText}>Upload Image</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+      <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.navigate('Login')}>
         <Text style={styles.buttonText}>Sign out</Text>
       </TouchableOpacity>
-    </View>
+    </View >
   )
 }
 
