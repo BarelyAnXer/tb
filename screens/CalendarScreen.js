@@ -86,7 +86,7 @@ const CalendarScreen = () => {
                 medicine: medicine,
                 time: time,
                 date: clickedDate,
-                imgURL: `${medicine}-${clickedDate}-${time}-${userID}`
+                // imgURL: `${medicine}-${clickedDate}-${time}-${userID}`
             });
             console.log('Medicine data added for user ID: ', userID);
         } catch (e) {

@@ -36,8 +36,6 @@ const RegisterScreen = () => {
                         });
                     });
 
-
-
                     console.log("Document written with ID: ", user.uid);
                 } catch (e) {
                     console.error("Error adding document: ", e);
