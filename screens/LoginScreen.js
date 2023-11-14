@@ -4,11 +4,15 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FIREBASE_AUTH } from '../firebase';
 import { useNavigation } from '@react-navigation/core'
 
+import { registerIndieID, unregisterIndieDevice } from 'native-notify';
+import axios from 'axios';
+
 const LoginScreen = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
     const navigation = useNavigation()
+
 
     // useEffect(() => {
     //     const unsubscribe = auth.onAuthStateChanged(user => {
@@ -24,6 +28,8 @@ const LoginScreen = () => {
         signInWithEmailAndPassword(FIREBASE_AUTH, email, password)
             .then((userCredential) => {
                 const user = userCredential.user;
+                registerIndieID(user.uid, 14722, 'qhH5PZOB2LG0kHdWLm12of');
+
                 // maybe put this to async storage
                 navigation.navigate('Home');
             })
@@ -63,8 +69,8 @@ const LoginScreen = () => {
                     <Text style={styles.buttonText}>Login</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    onPress={()=>{
-                      navigation.navigate('Register');
+                    onPress={() => {
+                        navigation.navigate('Register');
                     }}
                 >
                     <Text style={styles.buttonOutlineText}>Go to Register</Text>

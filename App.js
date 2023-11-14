@@ -5,10 +5,11 @@ import TermsAndConditionsScreen from './screens/TermsAndConditionScreen';
 import LoginScreen from './screens/LoginScreen';
 import BottomTabNavigator from './screens/BottomNavigator';
 import RegisterScreen from './screens/RegisterScreen';
-
+import registerNNPushToken from 'native-notify';
 
 
 export default function App() {
+  registerNNPushToken(14722, 'qhH5PZOB2LG0kHdWLm12of');
   const Stack = createNativeStackNavigator();
 
   return (

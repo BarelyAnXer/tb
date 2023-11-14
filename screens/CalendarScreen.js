@@ -6,7 +6,7 @@ import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "firebase
 import { onAuthStateChanged } from 'firebase/auth';
 import * as ImagePicker from 'expo-image-picker';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-
+import axios from 'axios';
 
 const CalendarScreen = () => {
     const [userID, setUserID] = useState('')
@@ -79,7 +79,7 @@ const CalendarScreen = () => {
     };
 
     const saveDataToFirebase = async () => {
-        const userMedsCollection = collection(FIREBASE_DB, `users/${userID}/medicines`);
+        const userMedsCollection = collan(FIREBASE_DB, `users/${userID}/medicines`);
 
         try {
             await addDoc(userMedsCollection, {
@@ -94,6 +94,16 @@ const CalendarScreen = () => {
         }
 
 
+        axios.post(`https://app.nativenotify.com/api/indie/notification`, {
+            subID: userID,
+            appId: 14722,
+            appToken: 'qhH5PZOB2LG0kHdWLm12of',
+            title: 'put your push notification title here as a string',
+            message: 'put your push notification message here as a string',
+            date:'2023-11-17',
+            time: '19:12'
+            
+        });
 
 
         setMedicine("");
