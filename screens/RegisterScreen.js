@@ -52,6 +52,22 @@ const RegisterScreen = () => {
         <KeyboardAvoidingView
             style={styles.container}
             behavior="padding">
+
+
+            <View style={styles.header}>
+                <Text></Text>
+            </View>
+
+            <View style={{
+                width: "80%"
+            }}>
+                <Text style={{
+                    fontSize: 32,
+                    alignSelf: "flex-start",
+                    marginBottom: 30
+                }}>Sign In</Text>
+            </View>
+
             <View style={styles.inputContainer}>
 
                 <TextInput
@@ -90,13 +106,17 @@ const RegisterScreen = () => {
                 >
                     <Text style={styles.buttonText}>Register</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                    onPress={() => {
-                        navigation.navigate('Login');
-                    }}
-                >
-                    <Text style={styles.buttonOutlineText}>Go to Login</Text>
-                </TouchableOpacity>
+
+
+                <View style={styles.linkContainer}>
+                    <Text>Already have an account?</Text>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('Login')}
+                    >
+                        <Text style={styles.buttonOutlineText}>Sign In here</Text>
+                    </TouchableOpacity>
+                </View>
+
             </View>
         </KeyboardAvoidingView>
     )
@@ -105,15 +125,24 @@ export default RegisterScreen
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    header: {
+        backgroundColor: "green",
+        width: '100%',
+        minHeight: "20%",
+        position: "relative",
+        paddingBottom: "20px",
+        borderRadius: 20,
+        marginBottom: 40
     },
     inputContainer: {
         width: '80%'
     },
     input: {
-        backgroundColor: 'white',
+        backgroundColor: '#EAEAEA',
         paddingHorizontal: 15,
         paddingVertical: 10,
         borderRadius: 10,
@@ -132,19 +161,24 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: 'center',
     },
-    buttonOutline: {
-        backgroundColor: 'white',
-        marginTop: 5,
-        borderColor: '#0782F9',
-        borderWidth: 2,
+    button: {
+        backgroundColor: '#5F7C8E',
+        width: '100%',
+        padding: 15,
+        borderRadius: 15,
+        alignItems: 'center',
     },
     buttonText: {
-        color: '#0782F9',
+        color: 'white',
         fontWeight: '700',
         fontSize: 16,
     },
+    linkContainer: {
+        display: "flex",
+        flexDirection: 'row',
+        gap: 5,
+    },
     buttonOutlineText: {
-        marginTop: 50,
         color: '#0782F9',
         fontWeight: '700',
         fontSize: 16,

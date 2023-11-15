@@ -1,42 +1,84 @@
-import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native'
-import React, { useState, useEffect } from 'react'
-import { useNavigation } from '@react-navigation/core'
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { FIREBASE_DB, FIREBASE_APP, FIREBASE_STORAGE } from '../firebase';
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-
-
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { FontAwesome } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { FIREBASE_AUTH } from '../firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const ProfileScreen = ({ navigation }) => {
+  const [user, setUser] = useState('')
+  const [userLoaded, setUserLoaded] = useState(false);
+
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+
+  useEffect(() => {
+    const getCurrentUserID = () => {
+      onAuthStateChanged(FIREBASE_AUTH, (user) => {
+        if (user) {
+          setUser(user);
+        } else {
+          console.log('No user is signed in');
+        }
+        setUserLoaded(true);
+      });
+    };
+
+    getCurrentUserID();
+  }, []);
+
+  const showToast = (type, text1, text2) => {
+    Toast.show({
+      type,
+      text1,
+      text2,
+    });
+  };
+
+  const handleChangePassword = async () => {
+    sendPasswordResetEmail(FIREBASE_AUTH, user.email)
+      .then(() => {
+        showToast('info', 'Password Reset', 'Password reset email sent successfully.')
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        showToast('info', 'Error sending password reset email', errorMessage)
+      });
+  };
 
   const handleChooseImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      // allowsEditing: true,
-      // aspect: [4, 3],
-      quality: 1,
-    });
-
     try {
-      const storageRef = ref(FIREBASE_STORAGE, "image.png");
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+      });
 
-      const response = await fetch(result.uri);
-      const blob = await response.blob();
-      console.log(result, "RESULT")
-      console.log(response, "RESPONSE")
+      if (!result.canceled) {
+        setLoading(true);
 
-      await uploadBytes(storageRef, blob);
-      console.log('Image uploaded successfully.');
-      fetchImageUrl();
+        const storageRef = ref(getStorage(), 'image.png');
+        const response = await fetch(result.assets[0].uri);
+        const blob = await response.blob();
+
+        await uploadBytes(storageRef, blob);
+        fetchImageUrl();
+        showToast('success', 'Image uploaded', 'Profile picture updated');
+      }
     } catch (error) {
       console.error('Error uploading image: ', error);
+      showToast('error', 'Error uploading image', error.message);
+    } finally {
+      setLoading(false);
     }
-
   };
 
   const fetchImageUrl = async () => {
-    const storageRef = ref(FIREBASE_STORAGE, "image.png");
+    const storageRef = ref(getStorage(), 'image.png');
     const downloadURL = await getDownloadURL(storageRef);
     setImage(downloadURL);
   };
@@ -47,54 +89,108 @@ const ProfileScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>ProfileScreen</Text>
+      <View style={styles.header}>
+        <Text>Profile</Text>
+      </View>
 
-      {image && <Image source={{ uri: image }} style={styles.image} />}
+      {image ? (
+        <Image source={{ uri: image }} style={styles.image} />
+      ) : (
+        <Image source={require('../assets/images/Dizziness_.png')} style={styles.image} />
+      )}
+
+      <Text style={{
+        fontSize: 30,
+        marginTop: 10,
+        color: '#00796B',
+        marginBottom: 10
+      }}>{user.email}</Text>
+
 
       <TouchableOpacity style={styles.uploadButton} onPress={handleChooseImage}>
-        <Text style={styles.buttonText}>Upload Image</Text>
+        <FontAwesome name="upload" size={20} color="#5F7C8E" />
+        <Text style={styles.uploadText}> Update Profile Picture</Text>
+      </TouchableOpacity>
+
+
+      <TouchableOpacity style={styles.changePasswordButton} onPress={handleChangePassword}>
+        <Text style={styles.buttonText}>Change Password</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.buttonText}>Sign out</Text>
+        <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
-    </View >
-  )
-}
 
-export default ProfileScreen
+
+
+
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007BFF" />
+        </View>
+      )}
+
+      <Toast ref={(ref) => Toast.setRef(ref)} />
+    </View>
+  );
+};
+
+export default ProfileScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#f9f9f9',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+  header: {
+    backgroundColor: "green",
+    width: '100%',
+    minHeight: "20%",
+    position: "relative",
+    paddingBottom: "20px",
+    borderRadius: 20,
+    marginBottom: 40
   },
   image: {
     width: 200,
     height: 200,
     borderRadius: 100,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   uploadButton: {
-    backgroundColor: '#3498db',
-    padding: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  changePasswordButton: {
+    backgroundColor: "#00796B",
+    width: '70%',
+    padding: 15,
     borderRadius: 5,
-    marginBottom: 10,
+    color: 'FFFFFF',
+    marginTop: 100,
+    alignItems: 'center'
   },
   logoutButton: {
-    backgroundColor: '#e74c3c',
-    padding: 10,
+    backgroundColor: 'red',
+    width: '70%',
+    padding: 15,
     borderRadius: 5,
+    marginTop: 16,
+    alignItems: 'center'
   },
   buttonText: {
-    color: 'white',
-    textAlign: 'center',
+    color: '#FFFFFF'
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 999,
   },
 });

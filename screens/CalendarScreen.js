@@ -79,7 +79,7 @@ const CalendarScreen = () => {
     };
 
     const saveDataToFirebase = async () => {
-        const userMedsCollection = collan(FIREBASE_DB, `users/${userID}/medicines`);
+        const userMedsCollection = collection(FIREBASE_DB, `users/${userID}/medicines`);
 
         try {
             await addDoc(userMedsCollection, {

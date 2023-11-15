@@ -14,7 +14,12 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={'TermsAndConditions'}>
+      <Stack.Navigator
+        initialRouteName={'TermsAndConditions'}
+        screenOptions={{
+          headerShown: false
+        }}
+      >
         <Stack.Screen
           name="Home"
           component={BottomTabNavigator}
