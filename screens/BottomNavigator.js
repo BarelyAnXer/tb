@@ -9,6 +9,7 @@ import SettingsScreen from './SettingsScreen';
 import ListScreen from './ListScreen';
 import CalendarScreen from './CalendarScreen';
 import MedicationStatusScreen from './MedicationStatusScreen';
+import Profile from './Profile';
 
 const Tab = createBottomTabNavigator();
 
@@ -65,7 +66,7 @@ const BottomTabNavigator = () => (
     />
      <Tab.Screen
       name="Profile"
-      component={ProfileScreen}
+      component={Profile}
       options={{
         tabBarIcon: ({ color, size }) => (
           <Ionicons name="person" color={color} size={size} />

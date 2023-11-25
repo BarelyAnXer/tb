@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Modal, TextInput, Button, Image } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Modal, TextInput, Button, Image, Platform } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { FIREBASE_DB, FIREBASE_AUTH, FIREBASE_STORAGE } from '../firebase';
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
@@ -7,6 +7,17 @@ import { onAuthStateChanged } from 'firebase/auth';
 import * as ImagePicker from 'expo-image-picker';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import axios from 'axios';
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import { FontAwesome } from '@expo/vector-icons';
+
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+    }),
+});
 
 const CalendarScreen = () => {
     const [userID, setUserID] = useState('')
@@ -23,6 +34,78 @@ const CalendarScreen = () => {
     const [imageUrls, setImageUrls] = useState({});
 
 
+
+
+    const [expoPushToken, setExpoPushToken] = useState('');
+    const [notification, setNotification] = useState(false);
+    const notificationListener = useRef();
+    const responseListener = useRef();
+    useEffect(() => {
+        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+
+        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+            setNotification(notification);
+        });
+
+        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+            console.log(response);
+        });
+
+        return () => {
+            Notifications.removeNotificationSubscription(notificationListener.current);
+            Notifications.removeNotificationSubscription(responseListener.current);
+        };
+    }, []);
+
+    async function registerForPushNotificationsAsync() {
+        let token;
+
+        if (Platform.OS === 'android') {
+            await Notifications.setNotificationChannelAsync('default', {
+                name: 'default',
+                importance: Notifications.AndroidImportance.MAX,
+                vibrationPattern: [0, 250, 250, 250],
+                lightColor: '#FF231F7C',
+                sound: 'notification.wav'
+            });
+        }
+
+        if (Device.isDevice) {
+            const { status: existingStatus } = await Notifications.getPermissionsAsync();
+            let finalStatus = existingStatus;
+            if (existingStatus !== 'granted') {
+                const { status } = await Notifications.requestPermissionsAsync();
+                finalStatus = status;
+            }
+            if (finalStatus !== 'granted') {
+                alert('Failed to get push token for push notification!');
+                return;
+            }
+            // Learn more about projectId:
+            // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
+            token = (await Notifications.getExpoPushTokenAsync({ projectId: 'your-project-id' })).data;
+            console.log(token);
+        } else {
+            alert('Must use physical device for Push Notifications');
+        }
+
+        return token;
+    }
+
+    async function schedulePushNotification() {
+        await Notifications.scheduleNotificationAsync({
+            content: {
+                title: "You've got mail! 📬",
+                body: 'Here is the notification body',
+                data: { data: 'goes here' },
+                sound: "notification.wav"
+            },
+            trigger: {
+                seconds: 2,
+                channelId: 'default',
+            },
+        });
+    }
 
     useEffect(() => {
         const getCurrentUserID = () => {
@@ -100,9 +183,9 @@ const CalendarScreen = () => {
             appToken: 'qhH5PZOB2LG0kHdWLm12of',
             title: 'put your push notification title here as a string',
             message: 'put your push notification message here as a string',
-            date:'2023-11-17',
+            date: '2023-11-17',
             time: '19:12'
-            
+
         });
 
 
@@ -201,8 +284,8 @@ const CalendarScreen = () => {
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
 
-                        <TouchableOpacity onPress={toggleModal}>
-                            <Text style={styles.exit}>Close</Text>
+                        <TouchableOpacity onPress={toggleModal} style={styles.exitContainer}>
+                            <Text style={styles.exit}>X</Text>
                         </TouchableOpacity>
 
 
@@ -229,6 +312,13 @@ const CalendarScreen = () => {
                         <Button title="Debug" onPress={() => {
                             console.log(medicinesList)
                         }} />
+
+                        <Button
+                            title="Press to schedule a notification"
+                            onPress={async () => {
+                                await schedulePushNotification();
+                            }}
+                        />
 
                         {/* turn this into page if ever na ano masyado maliit */}
                         <View>
@@ -283,12 +373,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
+
     },
     modalContent: {
         backgroundColor: 'white',
-        padding: 20,
+        padding: 10,
         borderRadius: 10,
-        alignItems: 'center',
+        display: 'flex',
+        height: 600,
+        width: '80%',
     },
     input: {
         height: 40,
@@ -298,9 +391,20 @@ const styles = StyleSheet.create({
         width: 200,
         paddingHorizontal: 10,
     },
+    exitContainer: {
+        alignSelf: 'flex-end',
+        backgroundColor: '#5F7C8E',
+        borderRadius: 15,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center', // Center the content vertically and horizontally
+        width: 30, // Adjust width and height as needed
+        height: 30,
+    },
     exit: {
-        backgroundColor: 'red',
-        marginTop: 10,
+        color: 'white',
+        // fontWeight: 'bold',
+        fontSize: 20,
     },
     medicineItem: {
         flexDirection: 'row',
