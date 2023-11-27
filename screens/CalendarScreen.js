@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Modal, TextInput, Button, Image, Platform } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Modal, TextInput, Button, Image, Platform, ScrollView } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { FIREBASE_DB, FIREBASE_AUTH, FIREBASE_STORAGE } from '../firebase';
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
@@ -10,6 +10,7 @@ import axios from 'axios';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { FontAwesome } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -25,7 +26,7 @@ const CalendarScreen = () => {
     const [isModalVisible, setModalVisible] = useState(false);
 
     const [medicine, setMedicine] = useState('');
-    const [time, setTime] = useState('');
+    const [time, setTime] = useState(0);
     const [pickedImage, setPickedImage] = useState(null);
 
     const [clickedDate, setClickedDate] = useState('');
@@ -34,8 +35,29 @@ const CalendarScreen = () => {
     const [imageUrls, setImageUrls] = useState({});
 
 
+    const [selectedTime, setSelectedTime] = useState(new Date());
+    const [showTimePicker, setShowTimePicker] = useState(false);
+    const handleTimeChange = (event, selected) => {
+        if (Platform.OS === 'android') {
+            if (event.type === 'set') {
+                const selectedDate = new Date(event.nativeEvent.timestamp);
+                setSelectedTime(selectedDate);
+                calculateTimeDifference(selectedDate);
+            }
+            setShowTimePicker(false);
+        } else {
+            const selectedDate = selected || new Date();
+            setSelectedTime(selectedDate);
+            calculateTimeDifference(selectedDate);
+        }
+    };
 
+    const calculateTimeDifference = (selected) => {
+        const timeDifference = Math.floor((selected.getTime() - Date.now()) / 1000);
+        // console.log('Time difference:', timeDifference);
+        setTime(timeDifference)
 
+    };
     const [expoPushToken, setExpoPushToken] = useState('');
     const [notification, setNotification] = useState(false);
     const notificationListener = useRef();
@@ -92,21 +114,6 @@ const CalendarScreen = () => {
         return token;
     }
 
-    async function schedulePushNotification() {
-        await Notifications.scheduleNotificationAsync({
-            content: {
-                title: "You've got mail! 📬",
-                body: 'Here is the notification body',
-                data: { data: 'goes here' },
-                sound: "notification.wav"
-            },
-            trigger: {
-                seconds: 2,
-                channelId: 'default',
-            },
-        });
-    }
-
     useEffect(() => {
         const getCurrentUserID = () => {
             onAuthStateChanged(FIREBASE_AUTH, (user) => {
@@ -143,8 +150,6 @@ const CalendarScreen = () => {
         fetchImageUrls();
     }, [medicinesList]);
 
-
-
     const fetchMedicines = async () => {
         const userMedsCollection = collection(FIREBASE_DB, `users/${userID}/medicines`);
         const snapshot = await getDocs(userMedsCollection);
@@ -167,7 +172,7 @@ const CalendarScreen = () => {
         try {
             await addDoc(userMedsCollection, {
                 medicine: medicine,
-                time: time,
+                time: selectedTime,
                 date: clickedDate,
                 // imgURL: `${medicine}-${clickedDate}-${time}-${userID}`
             });
@@ -177,20 +182,21 @@ const CalendarScreen = () => {
         }
 
 
-        axios.post(`https://app.nativenotify.com/api/indie/notification`, {
-            subID: userID,
-            appId: 14722,
-            appToken: 'qhH5PZOB2LG0kHdWLm12of',
-            title: 'put your push notification title here as a string',
-            message: 'put your push notification message here as a string',
-            date: '2023-11-17',
-            time: '19:12'
-
+        await Notifications.scheduleNotificationAsync({
+            content: {
+                title: "You've got mail! 📬",
+                body: 'Here is the notification body',
+                data: { data: 'goes here' },
+                sound: "notification.wav"
+            },
+            trigger: {
+                seconds: time,
+                channelId: 'default',
+            },
         });
 
-
         setMedicine("");
-        setTime("");
+        setTime(0);
         toggleModal();
         fetchMedicines();
     };
@@ -217,11 +223,6 @@ const CalendarScreen = () => {
     };
 
 
-    const customMarkedDates = {
-        '2023-11-20': { selected: true, selectedColor: 'blue', marked: true },
-        '2023-11-24': { customStyles: { backgroundColor: 'red' } },
-    };
-
     const handleChooseImage = async (medicineId) => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -242,7 +243,7 @@ const CalendarScreen = () => {
             console.log('Image uploaded successfully.');
 
             // Get the download URL of the uploaded image
-            const downloadURL = await getDownloadURL(storageRef);
+            // const downloadURL = await getDownloadURL(storageRef);
 
             const docRef = doc(FIREBASE_DB, `users/${userID}/medicines`, medicineId); // Replace with your collection and document ID
             await updateDoc(docRef, {
@@ -264,16 +265,23 @@ const CalendarScreen = () => {
             console.log(url);
             return url;
         } catch (error) {
-            console.error('Error fetching image URL: ', error);
+            console.error('Error fetching image URL: ');
             return null;
         }
+    };
+
+
+
+    const customMarkedDates = {
+        '2023-11-20': { selected: true, selectedColor: 'blue', marked: true },
+        '2023-11-24': { customStyles: { backgroundColor: 'red' } },
     };
 
     return (
         <View style={styles.container}>
             <Calendar
                 // Configure your calendar here
-                markedDates={customMarkedDates}
+                // markedDates={customMarkedDates}
                 onDayPress={(day) => {
                     setClickedDate(day.dateString);
                     toggleModal();
@@ -289,7 +297,7 @@ const CalendarScreen = () => {
                         </TouchableOpacity>
 
 
-                        <Text>Medicine:</Text>
+                        <Text style={styles.label}>Medicine:</Text>
                         <TextInput
                             style={styles.input}
                             value={medicine}
@@ -297,66 +305,83 @@ const CalendarScreen = () => {
                             placeholder="Enter medicine name"
                         />
 
-                        <Text>Time:</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={time}
-                            onChangeText={text => setTime(text)}
-                            placeholder="Enter time"
-                        />
+                        <Text style={styles.label}>Time:</Text>
+                        <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.time}>
+                            <Text style={{ flex: 1, textAlignVertical: 'center' }}>
+                                {selectedTime.toLocaleTimeString()}
+                            </Text>
+                        </TouchableOpacity>
 
-                        <Button title="Save" onPress={saveDataToFirebase} />
+                        {showTimePicker && (
+                            <DateTimePicker
+                                value={selectedTime}
+                                mode="time"
+                                onChange={handleTimeChange}
+                            />
+                        )}
+
+                        <TouchableOpacity onPress={saveDataToFirebase} style={styles.button}>
+                            <Text style={styles.buttonText}>Save</Text>
+                        </TouchableOpacity>
 
 
-
+                        {/* 
                         <Button title="Debug" onPress={() => {
-                            console.log(medicinesList)
-                        }} />
+                            console.log(time)
+                        }} /> */}
 
-                        <Button
+                        {/* <Button
                             title="Press to schedule a notification"
                             onPress={async () => {
                                 await schedulePushNotification();
                             }}
-                        />
+                        /> */}
 
                         {/* turn this into page if ever na ano masyado maliit */}
                         <View>
-                            {medicinesList.map((med, index) => {
-                                if (med.date === clickedDate) {
-                                    return (
-                                        <View key={med.id} style={styles.medicineItem}>
-                                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                                {/* Display the medicine image */}
-                                                <Image
-                                                    source={{ uri: imageUrls[med.id] }}
-                                                    style={{ width: 50, height: 50, marginRight: 10 }}
-                                                />
-                                                <Text>{med.medicine} - {med.time}</Text>
-                                            </View>
-                                            <TouchableOpacity onPress={() => deleteMedicine(med)}>
-                                                <Text style={styles.deleteButton}>Delete</Text>
-                                            </TouchableOpacity>
-                                            <TouchableOpacity
-                                                style={styles.uploadButton}
-                                                onPress={() => handleChooseImage(med.id)} // Pass the medicine id
-                                            >
-                                                <Text style={styles.buttonText}>Upload Image</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    );
-                                }
-                            })}
+                            <View style={styles.medicineContainer}>
+                                <ScrollView>
+                                    {medicinesList.map((med, index) => {
+                                        if (med.date === clickedDate) {
+                                            return (
+                                                <View key={med.id} style={styles.medicineItem}>
+                                                    <View style={{ flexDirection: 'column', gap: 15 }}>
+                                                        <Text>{med.medicine}</Text>
+                                                        <Text>{String(med.time)}</Text>
+                                                        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }} onPress={() => handleChooseImage(med.id)}>
+                                                            <FontAwesome name="upload" size={20} color="#5F7C8E" />
+                                                            <Text style={{ color: '#5F7C8E' }}> Upload Image</Text>
+                                                        </TouchableOpacity>
+                                                    </View>
+
+
+                                                    <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
+                                                        <Image
+                                                            source={{ uri: imageUrls[med.id] }}
+                                                            style={{ width: 100, height: 100, marginRight: 10 }}
+                                                        />
+                                                        <TouchableOpacity onPress={() => deleteMedicine(med)}>
+                                                            <Text style={{ color: 'red' }}>Delete</Text>
+                                                        </TouchableOpacity>
+                                                    </View>
+
+
+                                                </View>
+                                            );
+                                        }
+                                    })}
+                                </ScrollView>
+                            </View>
                         </View>
                     </View>
                 </View>
             </Modal>
 
-            <View>
+            {/* <View>
 
                 <Text>Display Events here</Text>
 
-            </View>
+            </View> */}
 
         </View>
     );
@@ -383,13 +408,35 @@ const styles = StyleSheet.create({
         height: 600,
         width: '80%',
     },
+    label: {
+        marginLeft: 20
+    },
     input: {
         height: 40,
         borderColor: 'gray',
         borderWidth: 1,
         marginBottom: 10,
-        width: 200,
+        width: '90%', // Adjust width as needed
         paddingHorizontal: 10,
+        borderRadius: 5, // Add border radius for a rounded look
+        fontSize: 16, // Adjust font size
+        backgroundColor: '#EAEAEA',
+        marginTop: 10,
+        alignSelf: 'center',
+    },
+    button: {
+        alignSelf: 'center',
+        width: '65%',
+        backgroundColor: '#5F7C8E',
+        borderRadius: 10, // Adding border radius for rounded corners
+        padding: 16,
+        alignItems: 'center', // Center content horizontally
+        marginTop: 15
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
     exitContainer: {
         alignSelf: 'flex-end',
@@ -410,13 +457,47 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 10,
         borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
+        marginTop: 10,
+        marginHorizontal: 'auto',
+        width: '90%',
+        borderRadius: 15,
+        alignSelf: 'center',
+        padding: 10,
+        borderWidth: 1,
+        borderColor: '#00756A',
+        backgroundColor: '#red'
     },
     deleteButton: {
         color: 'red',
     },
+    medicineContainer: {
+        maxHeight: 310,
+        // backgroundColor: 'red',
+        marginTop: 20,
+    },
+    uploadButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: '#FFFFFF'
+    },
+    time: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        padding: 10,
+        width: 200,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '90%',
+        paddingHorizontal: 10,
+        borderRadius: 5,
+        fontSize: 16,
+        marginTop: 10,
+        alignSelf: 'center',
+    }
 });
 
 export default CalendarScreen;
