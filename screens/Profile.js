@@ -1,30 +1,39 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { FIREBASE_AUTH } from '../firebase';
 
-const Profile = () => {
+const Profile = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text>Profile</Text>
+                <Text style={styles.headerText}>Profile</Text>
             </View>
 
 
             <View style={styles.profileContainer}>
-                <Image
-                    source={require('../assets/images/Cold_sweat.png')}
-                    style={styles.profileStyle}
-                />
-                <Text style={{
-                    fontSize: 20,
-                    fontWeight: 600
-                }}>Hi, "Christian" </Text>
+                <TouchableOpacity onPress={() => {
+                    navigation.navigate('ProfileScreen');
+                }}>
+                    <Image
+                        source={require('../assets/images/Cold_sweat.png')}
+                        style={styles.profileStyle}
+                    />
+                    <Text style={{
+                        fontSize: 20,
+                        fontWeight: 600
+                    }}>Hi, "Christian" </Text>
+                </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.button} onPress={() => { }}>
-                <Text style={styles.buttonText}>Change Password</Text>
+            <TouchableOpacity style={styles.button} onPress={() => {
+                navigation.navigate('Symptoms');
+            }}>
+                <Text style={styles.buttonText}>Symptoms</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button} onPress={() => { }}>
+            <TouchableOpacity style={styles.button} onPress={() => {
+                navigation.navigate('MedicationStatus');
+            }}>
                 <Text style={styles.buttonText}>Medication Status</Text>
             </TouchableOpacity>
 
@@ -71,9 +80,17 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
         borderRadius: 20,
         marginBottom: 40,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    headerText: {
+        fontSize: 25,
+        color: 'white',
+        fontWeight: 'bold',
+        letterSpacing: 3
     },
     profileContainer: {
-        backgroundColor: '#FDFDFB',
         width: '70%',
         height: 120,
         display: 'flex',
@@ -102,8 +119,8 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     profileStyle: {
-        width: 80,
-        height: 80,
+        width: 100,
+        height: 100,
         borderRadius: 50,
         marginBottom: 10,
 

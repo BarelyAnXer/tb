@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react'
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FIREBASE_AUTH } from '../firebase';
 import { useNavigation } from '@react-navigation/core'
+import Toast from 'react-native-toast-message';
+
 
 const LoginScreen = () => {
     const [email, setEmail] = useState('')
@@ -11,27 +13,25 @@ const LoginScreen = () => {
     const navigation = useNavigation()
 
 
-    // useEffect(() => {
-    //     const unsubscribe = auth.onAuthStateChanged(user => {
-    //         if (user) {
-    //             navigation.replace("Home")
-    //         }
-    //     })
-
-    //     return unsubscribe
-    // }, [])
+    const showToast = (type, text1, text2) => {
+        Toast.show({
+            type,
+            text1,
+            text2,
+        });
+    };
 
     const handleLogin = () => {
         signInWithEmailAndPassword(FIREBASE_AUTH, email, password)
             .then((userCredential) => {
-                const user = userCredential.user;
+                const user = userCredential.user; // maybe put this to async storage
 
-                // maybe put this to async storage
                 navigation.navigate('Home');
             })
             .catch((error) => {
                 const errorCode = error.code;
                 const errorMessage = error.message;
+                showToast('error', 'Account Error', "Invalid Login Credentials")
             });
     }
 
@@ -48,7 +48,7 @@ const LoginScreen = () => {
 
             <View style={styles.logoContainer}>
                 <Image
-                    source={require('../assets/images/Dizziness_.png')}
+                    source={require('../assets/images/logo1.png')}
                     style={styles.logo}
                 />
             </View>
@@ -97,6 +97,8 @@ const LoginScreen = () => {
                     </TouchableOpacity>
                 </View>
             </View>
+
+            <Toast ref={(ref) => Toast.setRef(ref)} />
         </KeyboardAvoidingView>
     )
 }

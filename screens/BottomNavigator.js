@@ -15,28 +15,28 @@ const Tab = createBottomTabNavigator();
 
 const BottomTabNavigator = () => (
   <Tab.Navigator
-  screenOptions={{
-    headerShown: false,
-    gestureEnabled: true,
-    gestureDirection: 'horizontal',
-    cardStyle: { backgroundColor: 'transparent' },
-    tabBarStyle: {
-      // Add styles for the tab bar
-      backgroundColor: 'white', // Change this to your preferred color
-      borderTopWidth: 0,
-      elevation: 0,
-    },
-    tabBarItemStyle: {
-      // Add styles for the tab items
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    transitionSpec: {
-      open: TransitionPresets.SlideFromRightIOS,
-      close: TransitionPresets.SlideToRightIOS,
-    },
-  }}
->
+    screenOptions={{
+      headerShown: false,
+      gestureEnabled: true,
+      gestureDirection: 'horizontal',
+      cardStyle: { backgroundColor: 'transparent' },
+      tabBarStyle: {
+        // Add styles for the tab bar
+        backgroundColor: 'white', // Change this to your preferred color
+        borderTopWidth: 0,
+        elevation: 0,
+      },
+      tabBarItemStyle: {
+        // Add styles for the tab items
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      transitionSpec: {
+        open: TransitionPresets.SlideFromRightIOS,
+        close: TransitionPresets.SlideToRightIOS,
+      },
+    }}
+  >
     <Tab.Screen
       name="Dashboard"
       component={HomeScreen}
@@ -55,7 +55,7 @@ const BottomTabNavigator = () => (
         ),
       }}
     />
-    <Tab.Screen
+    {/* <Tab.Screen
       name="Settings"
       component={SettingsScreen}
       options={{
@@ -63,8 +63,8 @@ const BottomTabNavigator = () => (
           <Ionicons name="settings" color={color} size={size} />
         ),
       }}
-    />
-     <Tab.Screen
+    /> */}
+    <Tab.Screen
       name="Profile"
       component={Profile}
       options={{
@@ -73,8 +73,8 @@ const BottomTabNavigator = () => (
         ),
       }}
     />
-   
-    <Tab.Screen
+
+    {/* <Tab.Screen
       name="List"
       component={MedicationStatusScreen}
       options={{
@@ -82,7 +82,7 @@ const BottomTabNavigator = () => (
           <Ionicons name="list" color={color} size={size} />
         ),
       }}
-    />
+    /> */}
   </Tab.Navigator>
 );
 

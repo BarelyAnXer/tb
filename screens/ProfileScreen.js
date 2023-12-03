@@ -27,7 +27,6 @@ const ProfileScreen = ({ navigation }) => {
         setUserLoaded(true);
       });
     };
-
     getCurrentUserID();
   }, []);
 
@@ -61,7 +60,7 @@ const ProfileScreen = ({ navigation }) => {
       if (!result.canceled) {
         setLoading(true);
 
-        const storageRef = ref(getStorage(), 'image.png');
+        const storageRef = ref(getStorage(), `profile/${user.uid}`);
         const response = await fetch(result.assets[0].uri);
         const blob = await response.blob();
 
@@ -78,10 +77,17 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   const fetchImageUrl = async () => {
-    const storageRef = ref(getStorage(), 'image.png');
-    const downloadURL = await getDownloadURL(storageRef);
-    setImage(downloadURL);
+    try {
+      const storageRef = ref(getStorage(), `profile/${user.uid}`);
+      const downloadURL = await getDownloadURL(storageRef);
+      console.log('Download URL:', downloadURL); // Log the URL here
+      setImage(downloadURL);
+    } catch (error) {
+      console.error('Error fetching image URL: ', error);
+      // showToast('error', 'Error fetching image URL', error.message);
+    }
   };
+
 
   useEffect(() => {
     fetchImageUrl();
@@ -117,7 +123,10 @@ const ProfileScreen = ({ navigation }) => {
         <Text style={styles.buttonText}>Change Password</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.navigate('Login')}>
+      <TouchableOpacity style={styles.logoutButton} onPress={() => {
+        // console.log(user)
+        navigation.navigate('Login')
+      }}>
         <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
 

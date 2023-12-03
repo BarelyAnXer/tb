@@ -60,7 +60,7 @@ const MedicationStatusScreen = () => {
         <View style={styles.container}>
 
             <View style={styles.header}>
-                <Text>Profile</Text>
+                <Text style={styles.headerText}>Medication Status</Text>
             </View>
 
 
@@ -143,6 +143,15 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
         borderRadius: 20,
         marginBottom: 40,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    headerText: {
+        fontSize: 25,
+        color: 'white',
+        fontWeight: 'bold',
+        letterSpacing: 3
     },
     heading: {
         fontSize: 18,

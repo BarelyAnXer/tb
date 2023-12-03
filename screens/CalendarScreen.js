@@ -279,9 +279,15 @@ const CalendarScreen = () => {
 
     return (
         <View style={styles.container}>
+
+            <View style={styles.header}>
+                <Text style={styles.headerText}>Calendar</Text>
+            </View>
+
             <Calendar
                 // Configure your calendar here
                 // markedDates={customMarkedDates}
+                style={styles.calendar}
                 onDayPress={(day) => {
                     setClickedDate(day.dateString);
                     toggleModal();
@@ -390,8 +396,29 @@ const CalendarScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        // justifyContent: 'center',
+        // alignItems: 'center',
+    },
+    header: {
+        backgroundColor: 'green',
+        width: '100%',
+        minHeight: '20%',
+        position: 'relative',
+        paddingBottom: 20,
+        borderRadius: 20,
+        marginBottom: 40,
+        display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center',
+        alignItems: 'center'
+    },
+    headerText: {
+        fontSize: 25,
+        color: 'white',
+        fontWeight: 'bold',
+        letterSpacing: 3
+    },
+    calendar: {
+        marginTop: 10,
     },
     modalContainer: {
         flex: 1,

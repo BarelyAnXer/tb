@@ -8,6 +8,11 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Home</Text>
+      </View>
+
+
       <Text>Email: {FIREBASE_AUTH.currentUser?.email}</Text>
       <Text>UID: {FIREBASE_AUTH.currentUser?.uid}</Text>
 
@@ -30,9 +35,28 @@ const styles = StyleSheet.create({
     height: 200,
   },
   container: {
-    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    height: '100%',
+  },
+  header: {
+    backgroundColor: 'green',
+    width: '100%',
+    minHeight: '20%',
+    position: 'relative',
+    paddingBottom: 20,
+    borderRadius: 20,
+    marginBottom: 40,
+    display: 'flex',
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  headerText: {
+    fontSize: 25,
+    color: 'white',
+    fontWeight: 'bold',
+    letterSpacing: 3
   },
   button: {
     backgroundColor: '#0782F9',

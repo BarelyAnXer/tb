@@ -5,6 +5,9 @@ import TermsAndConditionsScreen from './screens/TermsAndConditionScreen';
 import LoginScreen from './screens/LoginScreen';
 import BottomTabNavigator from './screens/BottomNavigator';
 import RegisterScreen from './screens/RegisterScreen';
+import MedicationStatusScreen from './screens/MedicationStatusScreen'
+import ProfileScreen from './screens/ProfileScreen'
+import ListScreen from './screens/ListScreen'
 
 
 export default function App() {
@@ -26,6 +29,21 @@ export default function App() {
         <Stack.Screen
           name="TermsAndConditions"
           component={TermsAndConditionsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="MedicationStatus"
+          component={MedicationStatusScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Symptoms"
+          component={ListScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ProfileScreen"
+          component={ProfileScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen name="Login" component={LoginScreen} />
