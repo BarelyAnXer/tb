@@ -69,7 +69,7 @@ const RegisterScreen = () => {
 
 
                 <View style={styles.header}>
-                    <Text></Text>
+                    <Text style={styles.headerText}>Register</Text>
                 </View>
 
                 <View style={{
@@ -149,13 +149,22 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     header: {
-        backgroundColor: "green",
+        backgroundColor: 'green',
         width: '100%',
-        minHeight: "20%",
-        position: "relative",
-        paddingBottom: "20px",
+        minHeight: '20%',
+        position: 'relative',
+        paddingBottom: 20,
         borderRadius: 20,
-        marginBottom: 40
+        marginBottom: 40,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    headerText: {
+        fontSize: 25,
+        color: 'white',
+        fontWeight: 'bold',
+        letterSpacing: 3
     },
     inputContainer: {
         width: '80%'

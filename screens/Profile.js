@@ -5,7 +5,7 @@ import { FIREBASE_AUTH } from '../firebase';
 const Profile = ({ navigation }) => {
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
+           <View style={styles.header}>
                 <Text style={styles.headerText}>Profile</Text>
             </View>
 
