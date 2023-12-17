@@ -102,7 +102,7 @@ const ProfileScreen = ({ navigation }) => {
       {image ? (
         <Image source={{ uri: image }} style={styles.image} />
       ) : (
-        <Image source={require('../assets/images/Dizziness_.png')} style={styles.image} />
+        <Image source={require('../assets/no.jpeg')} style={styles.image} />
       )}
 
       <Text style={{

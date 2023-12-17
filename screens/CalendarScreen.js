@@ -26,6 +26,7 @@ const CalendarScreen = () => {
     const [isModalVisible, setModalVisible] = useState(false);
 
     const [medicine, setMedicine] = useState('');
+    const [dosage, setDosage] = useState('');
     const [time, setTime] = useState(0);
     const [pickedImage, setPickedImage] = useState(null);
 
@@ -38,6 +39,7 @@ const CalendarScreen = () => {
     const [selectedTime, setSelectedTime] = useState(new Date());
     const [showTimePicker, setShowTimePicker] = useState(false);
     const handleTimeChange = (event, selected) => {
+
         if (Platform.OS === 'android') {
             if (event.type === 'set') {
                 const selectedDate = new Date(event.nativeEvent.timestamp);
@@ -174,7 +176,8 @@ const CalendarScreen = () => {
                 medicine: medicine,
                 time: selectedTime,
                 date: clickedDate,
-                // imgURL: `${medicine}-${clickedDate}-${time}-${userID}`
+                dosage: dosage,
+                imgURL: `${medicine}-${clickedDate}-${time}-${userID}`
             });
             console.log('Medicine data added for user ID: ', userID);
         } catch (e) {
@@ -311,6 +314,14 @@ const CalendarScreen = () => {
                             placeholder="Enter medicine name"
                         />
 
+                        <Text style={styles.label}>Dosage:</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={dosage}
+                            onChangeText={text => setDosage(text)}
+                            placeholder="Enter dosage"
+                        />
+
                         <Text style={styles.label}>Time:</Text>
                         <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.time}>
                             <Text style={{ flex: 1, textAlignVertical: 'center' }}>
@@ -330,30 +341,18 @@ const CalendarScreen = () => {
                             <Text style={styles.buttonText}>Save</Text>
                         </TouchableOpacity>
 
+                        <ScrollView>
+                            <View>
+                                <View style={styles.medicineContainer}>
 
-                        {/* 
-                        <Button title="Debug" onPress={() => {
-                            console.log(time)
-                        }} /> */}
-
-                        {/* <Button
-                            title="Press to schedule a notification"
-                            onPress={async () => {
-                                await schedulePushNotification();
-                            }}
-                        /> */}
-
-                        {/* turn this into page if ever na ano masyado maliit */}
-                        <View>
-                            <View style={styles.medicineContainer}>
-                                <ScrollView>
                                     {medicinesList.map((med, index) => {
                                         if (med.date === clickedDate) {
                                             return (
                                                 <View key={med.id} style={styles.medicineItem}>
                                                     <View style={{ flexDirection: 'column', gap: 15 }}>
                                                         <Text>{med.medicine}</Text>
-                                                        <Text>{String(med.time)}</Text>
+                                                        {/* <Text>{JSON.stringify(med.time, null, 4)}</Text> */}
+                                                        <Text>{med.dosage}</Text>
                                                         <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }} onPress={() => handleChooseImage(med.id)}>
                                                             <FontAwesome name="upload" size={20} color="#5F7C8E" />
                                                             <Text style={{ color: '#5F7C8E' }}> Upload Image</Text>
@@ -376,9 +375,10 @@ const CalendarScreen = () => {
                                             );
                                         }
                                     })}
-                                </ScrollView>
+
+                                </View>
                             </View>
-                        </View>
+                        </ScrollView>
                     </View>
                 </View>
             </Modal>

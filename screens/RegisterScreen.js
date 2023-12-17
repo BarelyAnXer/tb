@@ -79,7 +79,7 @@ const RegisterScreen = () => {
                         fontSize: 32,
                         alignSelf: "flex-start",
                         marginBottom: 30
-                    }}>Sign In</Text>
+                    }}>Register</Text>
                 </View>
 
                 <View style={styles.inputContainer}>
